@@ -3,6 +3,9 @@ from Commands.Command import Command
 class Help(Command):
     def __init__(self, name):
         super().__init__(name)
+
+    def help(self):
+        return "Helps"
     
     def add_available_commands(self, available_commands):
         """pass a list of active (not in-dev) commands so that the help menu can see them"""
@@ -26,6 +29,9 @@ class Help(Command):
             helpstring += "**Commands** \n```"
             for c in self.available_commands:
                 helpstring += self.spacing(c.command_name(), maxlen) + c.help() + "\n"
+        
+        helpstring += "``` \n"
+        return helpstring
 
     def spacing(self, name, maxlen):
         """Determine the number of spaces needed for helpstring formatting"""

@@ -4,5 +4,5 @@ class Ping(Command):
     def help(self):
         return "pong!"
     
-    def do(self, message, symbol):
+    def do(self, message):
         return "pong!"
