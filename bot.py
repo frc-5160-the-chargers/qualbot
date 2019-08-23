@@ -3,6 +3,7 @@ import asyncio
 import discord
 
 import Commands
+import Behaviors
 
 #create client
 client = discord.Client()
@@ -11,8 +12,14 @@ myprefix = "-"
 #declare commands
 helpcommand = Commands.Help("help")
 pingcommand = Commands.Ping("ping")
+
+#declare behaviors
+comment = Behaviors.TeamComment("comment")
+
 #put commands into list of available commands
 available_commands = [helpcommand, pingcommand]
+#pub behaviors into list of available behaviors
+available_behaviors = [comment]
 
 #notify help command of available commands
 helpcommand.add_available_commands(available_commands)
@@ -29,11 +36,16 @@ async def on_ready():
 async def on_message(message):
     """Respond to messages"""
 
+    #this loop does any interactable commands
     for cmd in available_commands:
         if message.content.startswith(myprefix + cmd.command_name().lower()):
             cmd_response = cmd.do(message)
             await message.channel.send(cmd_response)
-
+    
+    #this loop handles any behaviors that need to be performed based on the message
+    for be in available_behaviors:
+        if be.check(message):
+            be.do(message)
 
 
 #get key from gitignored text file
@@ -42,5 +54,5 @@ key = ""
 with open("key.txt", "r") as keyfile:
     key = str.strip(keyfile.readline())
 
-#TODO: Add thing to read the API key from a gitignored file
+#run the client with the key retrieved from key.txt
 client.run(key)
