@@ -2,3 +2,4 @@ config.json
 log.txt
 __pycache__
 run_queuing_lady.sh
+.vscode
