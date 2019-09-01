@@ -23,6 +23,11 @@ These are built to be run on fairly specific hardware although it's entirely pos
                 "name": "ncwak",
                 "year": 2019,
                 "match-type": "qm"
+            },
+            "sending-delay": 60,
+            "hook-data": {
+                "last-sent": 0,
+                "last-sent-b64": ""
             }
         }
     },
