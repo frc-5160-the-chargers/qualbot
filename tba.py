@@ -13,7 +13,7 @@ def get_next_unplayed(tba_client: tbapy.TBA, event, year=2019, comp_level="qm", 
     '''get the next unplayed match at an event. will return the first match using the obvious parameter'''
     matches = get_match_ids(tba_client, event, year, comp_level)
     for match in [matches[i+1] for i in range(0, len(matches))]:
-        if match["actual_time"] < 1000000000: # lol this is bad
+        if match['alliances']['blue']['score'] == -1:
             return match
         elif return_first:
             return match
