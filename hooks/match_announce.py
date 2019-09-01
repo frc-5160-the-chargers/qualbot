@@ -19,7 +19,7 @@ class MatchAnnouncementHook(Hook):
         out = ""
         for team in team_ids:
             team_data = self.tba_client.team(team, simple=True)
-            out += f"* {team_data['nickname']} [{team_data['team_number']}] -- OPR: {round(oprs[team])}\n"
+            out += "* {} [{}] -- OPR: {}\n".format(team_data['nickname'], team_data['team_number'], round(oprs[team]))
         return out
 
     def format_match_embed(self, match_data):
@@ -27,7 +27,7 @@ class MatchAnnouncementHook(Hook):
             self.logger.warning("Expected match data when formatting embed")
             return
         event_id = match_data["event_key"]
-        embed = discord.Embed(title=f"Match {match_data['match_number']}", color=0x1200ec)
+        embed = discord.Embed(title="Match {}".format(match_data['match_number']), color=0x1200ec)
         
         get_alliance_keys = lambda match, alliance: match_data["alliances"][alliance]["team_keys"]
         teams_red = get_alliance_keys(match_data, "red")

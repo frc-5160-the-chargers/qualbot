@@ -39,31 +39,32 @@ class Hook:
         self.logger.info("Sending embed...")
         last_sent_time = int(time.time()-self.get_hook_data("last-sent"))
         if last_sent_time < self.delay:
-            self.logger.warning(f"Not sent:\n\tLast sent {last_sent_time}s ago")
+            self.logger.warning("Not sent:\n\tLast sent {}s ago".format(last_sent_time))
             return
         embed = None
         try:
             embed = self.generate_embed()
-            last_embed_str = str(base64.b64encode(json.dumps(embed.to_dict(), sort_keys=True).encode('utf-8')), 'utf-8')
-            if last_embed_str == self.get_hook_data("last-sent-b64"):
-                self.logger.warning(f"This hook has already been sent")
-                return
-            self.update_hook_data("last-sent-b64", last_embed_str)
         except Exception as e:
             traceback.print_exc()
-            self.logger.error(f"Error generating embed:\n\t{e}")
+            self.logger.error("Error generating embed:\n\t{}".format(e))
         if embed != None:
             try:
+                last_embed_str = str(base64.b64encode(json.dumps(embed.to_dict(), sort_keys=True).encode('utf-8')), 'utf-8')
+                if last_embed_str == self.get_hook_data("last-sent-b64"):
+                    self.logger.warning("This hook has already been sent")
+                    return
+                self.update_hook_data("last-sent-b64", last_embed_str)
+                
                 discord_hook = discord.Webhook.partial(self.config_data["discord-id"], self.config_data["discord-token"], adapter=discord.RequestsWebhookAdapter())
                 discord_hook.send(embed=embed)
                 self.logger.info("Embed sent")
             except Exception as e:
                 traceback.print_exc()
-                self.logger.error(f"Error while sending embed:\n\t{e}")
+                self.logger.error("Error while sending embed:\n\t{}".format(e))
         else:
             self.logger.warning("Generated embed was empty")
         try:
             self.update_hook_data("last-sent", int(time.time()))
         except Exception as e:
             traceback.print_exc()
-            self.logger.error(f"Error recording last time sent:\n\t{e}")
+            self.logger.error("Error recording last time sent:\n\t{}".format(e))

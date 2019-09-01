@@ -2,7 +2,7 @@ import tbapy
 
 def get_event_id(event, year=2019):
     '''get a tba formatted event id'''
-    return f"{year}{event}"
+    return "{}{}".format(year, event)
 
 def get_match_ids(tba_client: tbapy.TBA, event_name, year=2019, comp_level="qm"):
     '''get all match ids in a dict in order of how they were played'''
