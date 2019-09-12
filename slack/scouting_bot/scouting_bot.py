@@ -202,7 +202,9 @@ class bot:
             return f'Error: team {team} not in the current event\'s teams list. Please use {command_character}event teams set [team1] [team2] [..] to set the teams';
         elif (team in self.currentEventInfo['teamScouters'] and len(self.currentEventInfo['teamScouters'][team]) > 0):
             usernames = ', '.join([self.getUsername(user) for user in self.currentEventInfo['teamScouters'][team]]);
-            return f'Users scouting team {team}: {usernames}';
+            channel_id = self.currentEventInfo['teamChannels'][team];
+            teamChannel = f'<#{channel_id}>';
+            return f'Users scouting team {team} (channel: {teamChannel}): {usernames}';
         else:
             return f'Error: team not currently scouted by any users. If this team should be scouted, please use {command_character}scouters add [@user1] [@user2] [..] [team number 1] [team number 2] [...] to register a scouter(s) of that team.';
 
@@ -221,10 +223,11 @@ class bot:
             bad_teams = [];
             good_teams = [];
             for team in teams:
-                if (team in self.currentEventInfo['teams']):
+                if (team in list(set(self.currentEventInfo['teams']))):
                     good_teams.append(team);
                 else:
                     bad_teams.append(team);
+            print(bad_teams);
             teams = list(set(good_teams));
             users = list(set(users));
             
@@ -440,7 +443,7 @@ class bot:
 
                 if (num_args >= 2 and command_args[1] == 'help'):
                     texts = [f'Help for scouters commands:', f'{command_character}scouters help - get help for the scouters command', f'{command_character}scouters get [team number | @scouter] - get info on who\'s scouting what team. Also returns links to the team channels', f'{command_character}scouters list - list users scouting teams in the current event', f'{command_character}scouters add [@user1] [@user2] [...] [team number 1] [team number 2] [...] - add scouters scouting teams. Will add the specified teams to each of the users\'s teams lists.', f'{command_character}scouters remove [@user1] [@user2] [...] [team1] [team2] [...] - removes each team from the specified users\' teams lists (if they exist).'];
-                    [web_client.chat_postMessage(channel=channel_id,text=text) for text in texts]        
+                    web_client.chat_postMessage(channel=channel_id,text='\n'.join(texts));  
 
                 if (num_args >= 2 and command_args[1] == 'get'):
                     return_msg = None;
