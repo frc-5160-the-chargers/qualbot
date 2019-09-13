@@ -28,7 +28,7 @@ MENTION_REGEX = "<@(|[WU].+?)>"
 
 currentFilepath = 'currentEvent.json';
 pastFilepath = 'pastEvents.json';
-infoFilepath = 'events\\{0}\\eventInfo.json';
+infoFilepath = 'events/{0}/eventInfo.json';
 
 channels_topic = 'scouting';
 channels_purpose_noscouters = 'Record qualitative data about each team. Each scouter scouting this team should take/post notes here so others can see. Team {0} is currently not scouted by anyone. Use ' + f'{command_character}scouters add [@user] [team] in #scouting to add a scouter.'
@@ -116,8 +116,8 @@ class bot:
             self.currentEventInfo['name'] = name;
             self.currentEvent = {'name':name,'filepath':name};
             print(self.currentEvent);
-            if (not(os.path.isdir(f'events\\{name}\\'))):
-                os.mkdir(f'events\\{name}\\');
+            if (not(os.path.isdir(f'events/{name}/'))):
+                os.mkdir(f'events/{name}/');
             self.saveData();
             return f'Event {name} successfully created! \nUse {command_character}event teams set [team1] [team2] [...] to register the teams in the event, and {command_character}event end to end the event.';
         else:
@@ -372,9 +372,11 @@ class bot:
         isBot = False;
         if ('user' in data):
             user = data['user']
-        else:
+        elif('bot_id' in data):
             isBot = True;
             user = data['bot_id'];
+        else:
+            return;
         mentions = self.getMentions(data['text']);
         #self.appClient.chat_postMessage(channel=channel_id,text='HELLO');
         #print(self.getUsername(user));
