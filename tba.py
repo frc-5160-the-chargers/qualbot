@@ -17,3 +17,13 @@ def get_next_unplayed(tba_client: tbapy.TBA, event, year=2019, comp_level="qm", 
             return match
         elif return_first:
             return match
+
+def format_alliance(tba_client: tbapy.TBA, event_id, team_ids):
+    '''format alliance team data into something reasonable to look at (mainly for embeds)'''
+    event_oprs = tba_client.event_oprs(event_id)["oprs"]
+    oprs = {i: event_oprs[i] for i in team_ids}
+    out = ""
+    for team in team_ids:
+        team_data = tba_client.team(team, simple=True)
+        out += "* {} [{}] -- OPR: {}\n".format(team_data['nickname'], team_data['team_number'], round(oprs[team]))
+    return out
