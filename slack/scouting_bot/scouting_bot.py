@@ -53,7 +53,6 @@ class bot:
         print(self.currentEvent);
         print(self.currentEventInfo);
         print(self.past_events);
-        print(self.appClient.auth_test());
         
 
     def emptyEventInfo(self):
@@ -383,6 +382,9 @@ class bot:
         if (data['text'].startswith(command_character) and not isBot):
             command_args = data['text'][1:].split(' ');
             num_args = len(command_args);
+            if (commang_args[0] == 'lastMessage'):
+                messages = web_client.conversations_history(channel=channel_id,count=2);
+                print(messages[1]);
             if (command_args[0] == 'event'):
                 if (num_args == 1):
                     web_client.chat_postMessage(channel=channel_id,text=f'Error in command syntax. Please use {command_character}event help to see a list of the event commands.');
