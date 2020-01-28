@@ -2,6 +2,8 @@ import os
 import time
 import re
 import slack
+from slack.rtm.client import RTMClient
+from slack.web.client import WebClient 
 import logging
 import json
 import datetime
@@ -48,7 +50,7 @@ class bot:
         self.past_events = [];
         self.loadData();
 
-        self.appClient = slack.WebClient(token=app_token);
+        self.appClient = WebClient(token=app_token);
         
         print(self.currentEvent);
         print(self.currentEventInfo);
@@ -513,13 +515,12 @@ class bot:
 
 botthing = None;
 
-@slack.RTMClient.run_on(event='message')
+@RTMClient.run_on(event='message')
 def recieve_message(**payload):
         botthing.recieve(payload);
 
 if __name__ == '__main__':
     botthing = bot();
-    rtm_client = slack.RTMClient(token=slack_token)
-    rtm_client.start()
-
+    rtm_client = RTMClient(token=slack_token)
+    rtm_client.rtm_connect(with_team_state=False)
 
