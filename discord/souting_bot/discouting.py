@@ -2,6 +2,7 @@ import discord
 import json
 import logging
 import re
+import os
 
 token_file="bot_token.json"
 with open(token_file) as f:
@@ -14,7 +15,7 @@ archive_category_name = 'scouting_archive';
 currentFilepath = 'currentEvent.json';
 pastFilepath = 'pastEvents.json';
 infoFilepath = 'events/{0}/eventInfo.json';
-guildFilepath = 'guildInfo.json';
+guildFilePath = 'guildInfo.json';
 
 command_character = '!';
 
@@ -29,7 +30,7 @@ channels_purpose_scouters = 'Record qualitative data about each team, and check 
 team_QInfo_header_msg = 'Quantiative data section for team {0}:';
 team_QInfo_header_msg_name = 'header'; #Note: special name for the header message in the quantitative data section; do not name any qInfo data header.
 team_QInfo_structure = {
-    'can_climb':{'message':'','reactions':{'✅':'Yes','❌':'No'}}
+    'can_climb':{'message':'Can It Climb???','reactions':{'✅':'Yes','❌':'No'}}
     
     
 };
@@ -88,7 +89,7 @@ class Bot:
             self.past_events = [];
 
         try:
-            with open(guildFilepath,'r') as guildFile:
+            with open(guildFilePath,'r') as guildFile:
                 self.guild_data = json.load(guildFile);
         except:
             self.guild_data = {};
@@ -123,7 +124,7 @@ class Bot:
         else:
             return f'Error: already an event in session. Please use {command_character}event end to end the current event.';
 
-    def endEvent(self,guild):
+    async def endEvent(self,guild):
         if (not(self.inEvent())):
             return f'Error: no event in session. Please use {command_character}event start [name] to start an event';
         else:
@@ -135,12 +136,12 @@ class Bot:
                 archive_category = await guild.create_category(archive_category_name);
                 self.guild_data['archive_category_id'] = archive_category.id;
             else:
-                archive_category = await guild.get_channel(self.guild_data['archive_category_id'])
+                archive_category = guild.get_channel(self.guild_data['archive_category_id'])
                 
             for channel_id in self.currentEventInfo['teamChannels'].values():
-                channel = await guild.get_channel(channel_id);
+                channel = guild.get_channel(channel_id);
                 if (channel is not None and channel.category_id is not archive_category.id):
-                    channel.edit(category=archive_category);
+                    await channel.edit(category=archive_category);
                     
             self.saveData();
             self.currentEvent = {};
@@ -152,7 +153,7 @@ class Bot:
         return 'Previous events: ' + ', '.join(self.past_events) + f'.\nTo reopen one of these, use {command_character}event open [name]';
 
             
-    def openEvent(self,guild,name):
+    async def openEvent(self,guild,name):
         if (self.inEvent()):
             return f'Error: already an event in session. Please use {command_character}event end to end the current event.';
         elif (not name in self.past_events):
@@ -164,24 +165,24 @@ class Bot:
             print('opening event');
             unarchive_category = None;
             if ('archive_category_id' not in self.guild_data or self.guild_data['archive_category_id'] is None):
-                unarchive_category = self.create_category(unarchive_category_name);
+                unarchive_category = guild.create_category(unarchive_category_name);
                 self.guild_data['unarchive_category_id'] = unarchive_category.id;
             else:
-                unarchive_category = await guild.get_channel(self.guild_data['unarchive_category_id']);
+                unarchive_category = guild.get_channel(self.guild_data['unarchive_category_id']);
                 
             for channel_id in self.currentEventInfo['teamChannels'].values():
-                channel = await guild.get_channel(channel_id)
+                channel = guild.get_channel(channel_id)
                 if (channel is not None and channel.category_id is not unarchive_category.id):
-                    channel.edit(category=unarchive_category);
+                    await channel.edit(category=unarchive_category);
             self.saveData();
             return f'Event successfully reopened!';
         
-    def setTeams(self,teams,guild):
+    async def setTeams(self,teams,guild):
         if (not self.inEvent()):
             return f'Error: no event in session. Please use {command_character}event start [name] to start an event';
         else:
             self.currentEventInfo['teams'] = teams;
-            self.createChannels(guild);
+            await self.createChannels(guild);
             self.saveData();
             return f'Event teams set. To view the teams in the event, use {command_character}event teams.';
 
@@ -213,27 +214,27 @@ class Bot:
         else:
             return f'Error: {username} not registered as scouting any teams. Please use {command_character}scouters add @[user] [team number] to register a scouter.'
 
-    def getTeamScouters(self,guilf,team):
+    async def getTeamScouters(self,guild,team):
         if (not self.inEvent()):
             return f'Error: no event in session. Please use {command_character}event start [name] to start an event';
         elif (team not in self.currentEventInfo['teams']):
             return f'Error: team {team} not in the current event\'s teams list. Please use {command_character}event teams set [team1] [team2] [..] to set the teams';
         elif (team in self.currentEventInfo['teamScouters'] and len(self.currentEventInfo['teamScouters'][team]) > 0):
-            usernames = ', '.join([self.getUsername(guild,user) for user in self.currentEventInfo['teamScouters'][team]]);
+            usernames = ', '.join([await self.getUsername(guild,user) for user in self.currentEventInfo['teamScouters'][team]]);
             channel_id = self.currentEventInfo['teamChannels'][team];
             teamChannel = f'<#{channel_id}>';
             return f'Users scouting team {team} (channel: {teamChannel}): {usernames}';
         else:
             return f'Error: team not currently scouted by any users. If this team should be scouted, please use {command_character}scouters add [@user1] [@user2] [..] [team number 1] [team number 2] [...] to register a scouter(s) of that team.';
 
-    def listScouters(self,guild):
+    async def listScouters(self,guild):
         if (not self.inEvent()):
             return f'Error: no event in session. Please use {command_character}event start [name] to start an event';
         else:
-            usernames = [self.getUsername(guild,user) for user in self.currentEventInfo['scouters']];
+            usernames = [await self.getUsername(guild,user) for user in self.currentEventInfo['scouters']];
             return f'List of users currently scouting teams: {", ".join(usernames)}';
 
-    def addScouter(self,guild,users,teams):
+    async def addScouter(self,guild,users,teams):
         if (not self.inEvent()):
             return f'Error: no event in session. Please use {command_character}event start [name] to start an event';
         else:
@@ -265,18 +266,18 @@ class Bot:
                 if (user not in self.currentEventInfo['scouters']):
                     self.currentEventInfo['scouters'].append(user);
             
-            [self.updateChannels(guild,team=team) for team in teams];
+            [await self.updateChannels(guild,team=team) for team in teams];
 
             self.saveData();
 
-            username_list = ', '.join([self.getUsername(guild,user) for user in users]);
+            username_list = ', '.join([await self.getUsername(guild,user) for user in users]);
             teams_list = ', '.join(teams);
             bad_teams_error = '';
             if (len(bad_teams) > 0):
                 bad_teams_error = 'Error: teams ' + ', '.join(bad_teams) + f' not registered in current event. Please use {command_character}event teams set [team1] [team2] [...] to set the teams.\n'
             return bad_teams_error + f'Scouters {username_list} now scouting teams {teams_list}. \nPlease use {command_character}scouters get [team|@user] to see who\'s scouting whom and get team channel links.'
 
-    def removeScouter(self,guild,users,teams):
+    async def removeScouter(self,guild,users,teams):
         if (not self.inEvent()):
             return f'Error: no event in session. Please use {command_character}event start [name] to start an event';
         else:
@@ -307,11 +308,11 @@ class Bot:
                 if (user not in self.currentEventInfo['scouters']):
                     self.currentEventInfo['scouters'].append(user);
             
-            [self.updateChannels(guild,team) for team in teams];
+            [await self.updateChannels(guild,team) for team in teams];
 
             self.saveData();
 
-            username_list = ', '.join([self.getUsername(guild,user) for user in users]);
+            username_list = ', '.join([await self.getUsername(guild,user) for user in users]);
             teams_list = ', '.join(teams);
             bad_teams_error = '';
             if (len(bad_teams) > 0):
@@ -320,14 +321,14 @@ class Bot:
 
 
     #called indirectly, returns object of reactionCounts
-    def fetchQuantitativeDataCounts(self,guild,team,dataName):
+    async def fetchQuantitativeDataCounts(self,guild,team,dataName):
             qInfoStruct = self.currentEventInfo['qInfoStructure'];
             chosenQData = qInfoStruct[dataName];
-            message = await guild.get_channel(self.currentEventInfo['teamChannels'][team]).fetch_message(self.currentEventInfo['teamQMessages'][team][dataName]);
-            return self.getReactionCounts(message,list(choseQData['emojis'].keys()));
+            message = await (guild.get_channel(self.currentEventInfo['teamChannels'][team])).fetch_message(self.currentEventInfo['teamQMessages'][team][dataName]);
+            return self.getReactionCounts(message,list(chosenQData['reactions'].keys()));
             
 
-    def getQuantitativeData(self,guild,team,dataName=None):
+    async def getQuantitativeData(self,guild,team,dataName=None):
         
         if (not self.inEvent()):
             return f'Error: no event in session. Please use {command_character}event start [name] to start an event';
@@ -337,23 +338,28 @@ class Bot:
             return f'Error: quantitative data {dataName} not tracked for the current event. Please use {command_character}event data list to see the quantitative data tracked at this event. If you think some other quantitative data should be tracked, contact harrison truscott or the current maintainer of the scouting bot.';
         else:
             if (dataName is not None):
-                reactionCounts = self.fetchQuantitativeDataCounts(self,guild,team,dataName);
+                reactionCounts = await self.fetchQuantitativeDataCounts(guild,team,dataName);
+                chosenQData = self.currentEventInfo['qInfoStructure'][dataName];
                 responses = [];
-                for (emojiID,count) in reactionCounts:
+                for (emojiID) in reactionCounts:
+                    count = reactionCounts[emojiID];
                     if (count > 1):
-                        response = str(chosenQData['emojis'][emojiID]);
+                        response = str(chosenQData['reactions'][emojiID]);
                         if count > 2:
                             response += f' (x{count-1})';
                         responses.append(response);
-                return f'Team {team}\'s quantitative data, {data_name}: ' + (', '.join(responses) if len(responses) > 0 else 'None') + '. To input quantiative interview data for a team, find the quantitative messages with {command_character}event data link [team] or by going to the team\'s channel and scrolling to the top/checking the pinned messages. React with the appropriate emote to select the option you want.';
+                return f'Team {team}\'s quantitative data, {dataName}: ' + (', '.join(responses) if len(responses) > 0 else 'None') + '.\nTo input quantiative interview data for a team, find the quantitative messages with {command_character}event data link [team] or by going to the team\'s channel and scrolling to the top/checking the pinned messages. React with the appropriate emote to select the option you want.';
             else:
                 qInfoStruct = self.currentEventInfo['qInfoStructure'];
                 result = f'Team {team}\'s quantitative data:';
                 for datum in qInfoStruct.keys():
-                    reactionCounts = self.fetchQuantitativeDataCounts(self,guild,team,datum);
-                    for (emojiID,count) in reactionCounts:
+                    reactionCounts = await self.fetchQuantitativeDataCounts(guild,team,datum);
+                    chosenQData = self.currentEventInfo['qInfoStructure'][datum];
+                    responses = [];
+                    for (emojiID) in reactionCounts:
+                        count = reactionCounts[emojiID]
                         if (count > 1):
-                            response = str(chosenQData['emojis'][emojiID]);
+                            response = str(chosenQData['reactions'][emojiID]);
                             if count > 2:
                                 response += f' (x{count-1})';
                             responses.append(response);
@@ -372,14 +378,14 @@ class Bot:
             eventName = self.currentEvent['name']
             return f'Data tracked for event {eventName}: ' + ', '.join(tracked_data);
 
-    def getTeamQDataLink(self,guild,team):
+    async def getTeamQDataLink(self,guild,team):
         if (not self.inEvent()):
             return f'Error: no event in session. Please use {command_character}event start [name] to start an event';
         elif (team not in self.currentEventInfo['teams']):
             return f'Error: team {team} not registered in current event. Please use {command_character}event teams set [team1] [team2] [...] to set the teams at an event';
         else:
-            channel = await guild.get_channel(self.currentEventInfo['teamChannels']);
-            message = channel.fetch_message(self.currentEventInfo['teamQMessages'][team][team_QInfo_header_msg_name]);
+            channel = guild.get_channel(self.currentEventInfo['teamChannels']);
+            message = await channel.fetch_message(self.currentEventInfo['teamQMessages'][team][team_QInfo_header_msg_name]);
             return f'Team {team} Quantitative Data: ' + message.jump_url + '.';
 
 
@@ -395,24 +401,30 @@ class Bot:
                 
 
         
-    def createQuantitativeMessages(self,channel,team,qInfoStruct):
+    async def createQuantitativeMessages(self,channel,team,qInfoStruct):
         self.currentEventInfo['teamQMessages'][team] = {};
-        header = channel.send(content=team_QInfo_header_msg);
+        header = await channel.send(content=team_QInfo_header_msg.format(team));
         self.currentEventInfo['teamQMessages'][team][team_QInfo_header_msg_name] = header.id;
-        header.pin();
-        for (qName,qMsg) in qInfoStruct.values():
+
+        for (qName) in qInfoStruct:
+            qMsg = qInfoStruct[qName];
             msg_text = qMsg['message'];
-            message = channel.send(content=msg_text);
-            for emojiId in qMsg['emojis']:
+            print(qMsg);
+            print(msg_text);
+            message = await channel.send(content=msg_text);
+
+            for emojiId in qMsg['reactions']:
                 emoji = self.getEmojiFromID(emojiId);
-                message.add_reaction(emoji);
+                await message.add_reaction(emoji);
             self.currentEventInfo['teamQMessages'][team][qName] = message.id;
+        for msgId in self.currentEventInfo['teamQMessages'][team].values():
+            message = await channel.fetch_message(msgId);
             message.pin();
-        
+
     
 
     #no conditionals because it should never be called by the user directly; whenever the teams are updated, the channels are created
-    def createChannels(self,guild):
+    async def createChannels(self,guild):
         print('teams creating');
         teamsList = self.currentEventInfo['teams'];
         prefix = self.currentEventInfo['name'] + '-team ';
@@ -424,34 +436,34 @@ class Bot:
                     archive_category = await guild.create_category(archive_category_name);
                     self.guild_data['archive_category_id'] = archive_category.id;
                 else:
-                    archive_category = await guild.get_channel(self.guild_data['archive_category_id'])
+                    archive_category = guild.get_channel(self.guild_data['archive_category_id'])
                 print('adding new team channel');
                 channelObject = await guild.create_text_channel(name=prefix+team,category=archive_category);
                 self.currentEventInfo['teamChannels'][team] = channelObject.id;
-                self.createQuantitativeMessages(channel,team,qInfo);
+                await self.createQuantitativeMessages(channelObject,team,qInfo);
         
-        self.updateChannels(guild);
+        await self.updateChannels(guild);
 
 
-    def updateChannels(self,guild,team=None):
+    async def updateChannels(self,guild,team=None):
         teamsList = [team];
         print('channel updating');
         if (team is None):
             teamsList = self.currentEventInfo['teams'];
         for team in teamsList:
             channelId = self.currentEventInfo['teamChannels'][team];
-            channel = await guild.get_channel(channelId);
+            channel = guild.get_channel(channelId);
             
             
             correctPurpose = channels_purpose_noscouters.format(team);
             if (team in self.currentEventInfo['teamScouters'] and len(self.currentEventInfo['teamScouters'][team]) > 0):
-                correctPurpose = channels_purpose_scouters.format(team) + ', '.join([self.getUsername(guild,user) for user in self.currentEventInfo['teamScouters'][team]]);
+                correctPurpose = channels_purpose_scouters.format(team) + ', '.join([await self.getUsername(guild,user) for user in self.currentEventInfo['teamScouters'][team]]);
             
             if (channel.topic is not correctPurpose):
                 obj = channel.edit(topic=correctPurpose);
 
 
-    def getUsername(self,guild,userId):
+    async def getUsername(self,guild,userId):
         user = await guild.get_member(userId);
         if (user is not None):
             return str(user);
@@ -503,7 +515,7 @@ class Bot:
                     if (return_msg is not None and return_msg != ''):
                             await channel.send(return_msg);
                 elif (num_args >= 2 and command_args[1] == 'end'):
-                    return_msg = self.endEvent(guild);
+                    return_msg = await self.endEvent(guild);
                     if (return_msg is not None and return_msg != ''):
                         await channel.send(return_msg);
 
@@ -526,14 +538,14 @@ class Bot:
                         if (num_args < 4):
                             return_msg = 'Error in command syntax: please specify team to generate a link for.';
                         else:
-                            return_msg = self.getTeamQDataLink(guild,command_args[3]);
+                            return_msg = await self.getTeamQDataLink(guild,command_args[3]);
                     elif (command_args[2] == 'get'):
                         if (num_args < 4):
                             return_msg = 'Error in command syntax: please specify team to get data from.';
                         elif (num_args == 4):
-                            return_msg = self.getQuantitativeData(guild,command_args[3]);
+                            return_msg = await self.getQuantitativeData(guild,command_args[3]);
                         else:
-                            return_msg = self.getQuantitativeData(guild,command_args[3],command_args[4]);
+                            return_msg = await self.getQuantitativeData(guild,command_args[3],command_args[4]);
                     else:
                         return_msg = "error";
                         
@@ -548,18 +560,18 @@ class Bot:
                     elif (num_args >3):
                         return_msg = f'Error in command syntax: please do not use spaces in names. If an event already happened, its name had no spaces. \nTry underscores, or use {command_character}event previous to get a list of the previous events';
                     else:
-                        return_msg = self.openEvent(guild,command_args[2]);
+                        return_msg = await self.openEvent(guild,command_args[2]);
                     if (return_msg is not None and return_msg != ''):
                         await channel.send(return_msg);
 
                 elif (num_args >= 2 and command_args[1] == 'teams'):
                     return_msg = '';
                     if (num_args == 2):
-                        return_msg = self.teamsList();
+                        return_msg = await self.teamsList();
                     
                     elif (num_args > 3 and command_args[2] == 'set'):
                         teams = command_args[3:];
-                        return_msg = self.setTeams(teams,guild);
+                        return_msg = await self.setTeams(teams,guild);
                     else:
                         remaining_args = ' '.join(command_args[2:]);
                         return_msg = f'Invalid {command_character}event teams arguments: {remaining_args}. Please use {command_character}event help for options.';
@@ -583,15 +595,15 @@ class Bot:
                     if (num_args == 2):
                         return_msg = f'Error in command syntax: please specify either a team number or a mention a scouter with syntax {command_character}scouters get [team number | @scouter] \n(remember to mute pings in #scouting if you haven\'t already so you can use mentions';
                     elif self.isMention(command_args[2]):
-                        user = self.getMentions(command_args[2])[0];
-                        return_msg = self.getScouterTeams(user,self.getUsername(guild,user));
+                        user = await self.getMentions(command_args[2])[0];
+                        return_msg = await self.getScouterTeams(user, await self.getUsername(guild,user));
                     else:
-                        return_msg = self.getTeamScouters(guild,command_args[2]);
+                        return_msg = await self.getTeamScouters(guild,command_args[2]);
                     if (return_msg is not None and return_msg != ''):
                         await channel.send(return_msg);
 
                 elif (num_args >= 2 and command_args[1] == 'list'):
-                    return_msg = self.listScouters(guild);
+                    return_msg = await self.listScouters(guild);
                     if (return_msg is not None and return_msg != ''):
                         await channel.send(return_msg);
 
@@ -603,7 +615,7 @@ class Bot:
                         return_msg = f'Error in command syntax: please specify both the names and teams to add scouters with the syntax {command_character}scouters add @[name1] @[name2] @[name...] [team number 1] [team number 2] [team number ...]';
                     else:
                         non_mention_args = [arg for arg in command_args[2:] if (not(self.isMention(arg)))];
-                        return_msg = self.addScouter(guild,mentions,non_mention_args);
+                        return_msg = await self.addScouter(guild,mentions,non_mention_args);
                     if (return_msg is not None and return_msg != ''):
                         await channel.send(return_msg);
 
@@ -615,7 +627,7 @@ class Bot:
                         return_msg = f'Error in command syntax: please specify both the names and teams to remove scouted teams with the syntax {command_character}scouters remove @[name1] @[name2] @[name...] [team number 1] [team number 2] [team number ...]';
                     else:
                         non_mention_args = [arg for arg in command_args[2:] if (not(self.isMention(arg)))];
-                        return_msg = self.removeScouter(guild,mentions,non_mention_args);
+                        return_msg = await self.removeScouter(guild,mentions,non_mention_args);
                     if (return_msg is not None and return_msg != ''):
                         await channel.send(return_msg);
                 else:
