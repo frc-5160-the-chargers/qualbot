@@ -124,13 +124,13 @@ class Bot:
         else:
             return f'Error: already an event in session. Please use {command_character}event end to end the current event.';
 
-    async def endEvent(self,guild):
+    async def endEvent(self,guild,sourceChannel):
         if (not(self.inEvent())):
             return f'Error: no event in session. Please use {command_character}event start [name] to start an event';
         else:
             if (self.currentEvent['name'] not in self.past_events):
                 self.past_events.append(self.currentEvent['name']);
-
+            await sourceChannel.send(content="Archiving event channels...");
             archive_category = None;
             if ('archive_category_id' not in self.guild_data or self.guild_data['archive_category_id'] is None):
                 archive_category = await guild.create_category(archive_category_name);
@@ -153,7 +153,7 @@ class Bot:
         return 'Previous events: ' + ', '.join(self.past_events) + f'.\nTo reopen one of these, use {command_character}event open [name]';
 
             
-    async def openEvent(self,guild,name):
+    async def openEvent(self,guild,name,sourceChannel):
         if (self.inEvent()):
             return f'Error: already an event in session. Please use {command_character}event end to end the current event.';
         elif (not name in self.past_events):
@@ -164,8 +164,11 @@ class Bot:
             self.currentEventInfo = json.load(fp);
             print('opening event');
             unarchive_category = None;
-            if ('archive_category_id' not in self.guild_data or self.guild_data['archive_category_id'] is None):
-                unarchive_category = guild.create_category(unarchive_category_name);
+            print(self.guild_data);
+            await sourceChannel.send(content="Unarchiving event channels...");
+            if ('unarchive_category_id' not in self.guild_data or self.guild_data['unarchive_category_id'] is None):
+                print('not in');
+                unarchive_category = await guild.create_category(unarchive_category_name);
                 self.guild_data['unarchive_category_id'] = unarchive_category.id;
             else:
                 unarchive_category = guild.get_channel(self.guild_data['unarchive_category_id']);
@@ -173,15 +176,17 @@ class Bot:
             for channel_id in self.currentEventInfo['teamChannels'].values():
                 channel = guild.get_channel(channel_id)
                 if (channel is not None and channel.category_id is not unarchive_category.id):
-                    await channel.edit(category=unarchive_category);
+                    await channel.edit(category=unarchive_category,sync_permissions=True);
             self.saveData();
             return f'Event successfully reopened!';
         
-    async def setTeams(self,teams,guild):
+    async def setTeams(self,teams,guild,sourceChannel):
         if (not self.inEvent()):
             return f'Error: no event in session. Please use {command_character}event start [name] to start an event';
         else:
-            self.currentEventInfo['teams'] = teams;
+            await sourceChannel.send(content="Creating team channels...");
+            self.currentEventInfo['teams'] = list(set(teams));
+            self.currentEventInfo['teams'].sort();
             await self.createChannels(guild);
             self.saveData();
             return f'Event teams set. To view the teams in the event, use {command_character}event teams.';
@@ -431,14 +436,14 @@ class Bot:
         qInfo = self.currentEventInfo['qInfoStructure'];
         for team in teamsList:
             if (not (team in self.currentEventInfo['teamChannels'])):
-                archive_category = None
-                if ('archive_category_id' not in self.guild_data or self.guild_data['archive_category_id'] is None):
-                    archive_category = await guild.create_category(archive_category_name);
-                    self.guild_data['archive_category_id'] = archive_category.id;
+                unarchive_category = None
+                if ('unarchive_category_id' not in self.guild_data or self.guild_data['unarchive_category_id'] is None):
+                    unarchive_category = await guild.create_category(unarchive_category_name);
+                    self.guild_data['unarchive_category_id'] = unarchive_category.id;
                 else:
-                    archive_category = guild.get_channel(self.guild_data['archive_category_id'])
+                    unarchive_category = guild.get_channel(self.guild_data['unarchive_category_id'])
                 print('adding new team channel');
-                channelObject = await guild.create_text_channel(name=prefix+team,category=archive_category);
+                channelObject = await guild.create_text_channel(name=prefix+team,category=unarchive_category);
                 self.currentEventInfo['teamChannels'][team] = channelObject.id;
                 await self.createQuantitativeMessages(channelObject,team,qInfo);
         
@@ -515,7 +520,7 @@ class Bot:
                     if (return_msg is not None and return_msg != ''):
                             await channel.send(return_msg);
                 elif (num_args >= 2 and command_args[1] == 'end'):
-                    return_msg = await self.endEvent(guild);
+                    return_msg = await self.endEvent(guild,channel);
                     if (return_msg is not None and return_msg != ''):
                         await channel.send(return_msg);
 
@@ -560,18 +565,18 @@ class Bot:
                     elif (num_args >3):
                         return_msg = f'Error in command syntax: please do not use spaces in names. If an event already happened, its name had no spaces. \nTry underscores, or use {command_character}event previous to get a list of the previous events';
                     else:
-                        return_msg = await self.openEvent(guild,command_args[2]);
+                        return_msg = await self.openEvent(guild,command_args[2],channel);
                     if (return_msg is not None and return_msg != ''):
                         await channel.send(return_msg);
 
                 elif (num_args >= 2 and command_args[1] == 'teams'):
                     return_msg = '';
                     if (num_args == 2):
-                        return_msg = await self.teamsList();
+                        return_msg = self.teamsList();
                     
                     elif (num_args > 3 and command_args[2] == 'set'):
                         teams = command_args[3:];
-                        return_msg = await self.setTeams(teams,guild);
+                        return_msg = await self.setTeams(teams,guild,channel);
                     else:
                         remaining_args = ' '.join(command_args[2:]);
                         return_msg = f'Invalid {command_character}event teams arguments: {remaining_args}. Please use {command_character}event help for options.';
