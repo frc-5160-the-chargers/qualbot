@@ -1,4 +1,4 @@
-import json, requests, random
+import json, requests, random, math
 
 with open("secrets.json") as json_file:
     fileContents = json.load(json_file)
@@ -10,10 +10,22 @@ def getTeams(event="2020ncwak"):
     teamList = []
     for team in teams:
         teamList.append(team["key"][3:])
+    teamList.remove("5160")
     return teamList
 
-def randomizeTeams(teamList, scoutpairs=9):
+def randomizeTeams(teamList, scoutpairs=6):
     random.shuffle(teamList)
-    teamsPerPair = int(len(teamList) / scoutpairs)
+    teamRandom = []
+    teamsPerPair = math.ceil(len(teamList) / scoutpairs)
+    for i in range(0, len(teamList), teamsPerPair):
+        teamRandom.append(teamList[i:i + teamsPerPair])
+    if len(teamRandom[-1]) != teamsPerPair:
+        randomChoice = random.choice(teamRandom[-2])
+        teamRandom[-2].remove(randomChoice)
+        teamRandom[-1].append(randomChoice)
+    return teamRandom
 
-print(getTeams())
+teamList = getTeams()
+teams = randomizeTeams(teamList)
+with open("teamsRandomized.txt", "w") as writeFile:
+    writeFile.write(str(teams))
