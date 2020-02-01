@@ -33,6 +33,9 @@ def randomizeTeams(teamList, scoutpairs=6):
     return teamRandom
 
 teamList = getTeams()
+# for i in teamList:
+#     params = {"token": token, "name": i}
+#     requests.get(url="https://slack.com/api/conversations.create", params=params)
 teams = randomizeTeams(teamList)
 scoutsTeams = {}
 for i in range(len(scoutingPairs)):
