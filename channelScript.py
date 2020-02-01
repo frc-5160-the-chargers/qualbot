@@ -4,6 +4,9 @@ with open("secrets.json") as json_file:
     fileContents = json.load(json_file)
 
 authKey = fileContents["authKey"]
+scoutingPairs = ["Aarav Gupta, Aidan Sher, Allen Shen", "Ashleigh Smith, Brandon Yi, Colin Frazer", 
+                 "Cy Reading, Harrison Truscott, Jono Jenkens", "Kaeshev Alapati, Max Li, Obinna Modilim",
+                 "Ravi Dev, Rin Mauney, Sebastian Polge", "Tommy Frank, Zach Wiebe"]
 
 def getTeams(event="2020ncwak"):
     teams = requests.get(url=f"https://www.thebluealliance.com/api/v3/event/{event}/teams", headers={"X-TBA-Auth-Key": authKey}).json()
@@ -27,5 +30,8 @@ def randomizeTeams(teamList, scoutpairs=6):
 
 teamList = getTeams()
 teams = randomizeTeams(teamList)
+scoutsTeams = {}
+for i in range(len(scoutingPairs)):
+    scoutsTeams.setdefault(scoutingPairs[i], teams[i])
 with open("teamsRandomized.txt", "w") as writeFile:
-    writeFile.write(str(teams))
+    writeFile.write(str(scoutsTeams))
