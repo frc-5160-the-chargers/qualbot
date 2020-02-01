@@ -2,8 +2,12 @@ import json, requests, random, math
 
 with open("secrets.json") as json_file:
     fileContents = json.load(json_file)
-
 authKey = fileContents["authKey"]
+
+with open("slack_tokens.json") as tokenFile:
+    fileContents = json.load(tokenFile)
+token = fileContents["bot_token"]
+
 scoutingPairs = ["Aarav Gupta, Aidan Sher, Allen Shen", "Ashleigh Smith, Brandon Yi, Colin Frazer", 
                  "Cy Reading, Harrison Truscott, Jono Jenkens", "Kaeshev Alapati, Max Li, Obinna Modilim",
                  "Ravi Dev, Rin Mauney, Sebastian Polge", "Tommy Frank, Zach Wiebe"]
