@@ -4,8 +4,8 @@ import traceback
 import time
 import base64
 
-from fancy_logger import Logger
-from slack import send_message_to_slack
+from common.logger import Logger
+from common.slack import send_message_to_slack
 
 class Hook:
     def __init__(self, hook_name, config_file="config.json"):
