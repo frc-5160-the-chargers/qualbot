@@ -2,9 +2,9 @@ import tbapy
 import discord
 import json
 
-from .hook import DiscordHook, SlackHook
-from slack import create_slack_embed
-from tba import *
+from hooks.hook import DiscordHook, SlackHook
+from common.slack import create_slack_embed
+from common.tba import *
 
 # TODO proper documentation for configuration and deployment
 # TODO conglomerate following classes if possible

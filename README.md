@@ -7,32 +7,51 @@ Various tools used by FRC 5160 ([The Chargers](https://www.thebluealliance.com/t
 
 Queuing Lady is a webhook that's designed to produce useful embeds for Discord alerting people about upcoming matches.
 
-### Configuration
-By default all webhooks are configured through `config.json`, although if you want you can change that everywhere as needed.
-These are built to be run on fairly specific hardware although it's entirely possible for you to modify it to your needs.
-#### Example `config.json` syntax
+Queuing Lady needs to have a few extra lines added to the config:
 ```json
-{
-    "webhooks": {
-        "queuing-lady": {
-            "discord-id": "[REDACTED]",
-            "discord-token": "[REDACTED]",
-            "tba": "[REDACTED]",
-            "debugging-matches": true,
-            "event-data": {
-                "name": "ncwak",
-                "year": 2019,
-                "match-type": "qm"
-            },
-            "sending-delay": 60,
-            "hook-data": {
-                "last-sent": 0,
-                "last-sent-b64": ""
-            }
-        }
+"hook": {
+    "tba": "",
+    "event-data": {
+        "name": "ncwak",
+        "year": 2020,
+        "match-type": "qm"
     },
-    "logging": {
-        "log-file": "log.txt"
+    "debugging-matches": false
+}
+```
+
+## Configuration
+All webhooks are configured through `config.json` in the root directory.
+There are some base hook configurations, for a hook derived off something else (like queuing-lady), you'll need to add a bit more to the config structure for the data taken by it.
+
+Example `config.json` structure for a discord webhook
+```json
+"discord-hook": {
+    "discord-id": "",
+    "discord-token": "",
+    "sending-delay": 0,
+    "hook-data": {
+        "last-sent": 0,
+        "last-sent-b64": ""
     }
+}
+```
+
+Example `config.json` structure for a slack webhook
+```json
+"slack-hook": {
+    "slack-url": "",
+    "sending-delay": 0,
+    "hook-data": {
+        "last-sent": 0,
+        "last-sent-b64": ""
+    }
+}
+```
+
+This is also required for the logging and everything to work -- just change `logging` to wherever you want the log file to be. 
+```json
+"logging": {
+    "log-file": "log.txt"
 }
 ```
