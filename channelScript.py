@@ -8,9 +8,7 @@ with open("slack_tokens.json") as tokenFile:
     fileContents = json.load(tokenFile)
 token = fileContents["bot_token"]
 
-scoutingPairs = ["Aarav Gupta, Aidan Sher, Allen Shen", "Ashleigh Smith, Brandon Yi, Colin Frazer", 
-                 "Cy Reading, Harrison Truscott, Jono Jenkens", "Kaeshev Alapati, Max Li, Obinna Modilim",
-                 "Ravi Dev, Rin Mauney, Sebastian Polge", "Tommy Frank, Zach Wiebe"]
+scoutingPairs = []
 
 def getTeams(event="2020ncwak"):
     teams = requests.get(url=f"https://www.thebluealliance.com/api/v3/event/{event}/teams", headers={"X-TBA-Auth-Key": authKey}).json()
