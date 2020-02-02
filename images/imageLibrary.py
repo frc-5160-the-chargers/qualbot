@@ -11,7 +11,7 @@ while True:
         cv2.imshow("Capturing", frame)
         key = cv2.waitKey(1)
         if key == ord('s'): 
-            filename = f'images\{team}_saved_img.jpg'
+            filename = f'{team}_saved_img.jpg'
             cv2.imwrite(filename=filename, img=frame)
             webcam.release()
             print("Processing image...")
