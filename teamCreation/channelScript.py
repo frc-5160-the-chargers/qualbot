@@ -1,4 +1,4 @@
-import json, requests, random, math
+import json, requests, random, math, xlsxwriter
 
 with open(r"teamCreation\secrets.json") as json_file:
     fileContents = json.load(json_file)
@@ -31,10 +31,15 @@ def randomizeTeams(teamList, scoutpairs=6):
         teamRandom[-1].append(randomChoice)
     return teamRandom
 
+wb = xlsxwriter.Workbook("teamInfo.xlsx")
+ws = wb.add_worksheet()
+LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 teamList = getTeams()
-for i in teamList:
-    params = {"token": token, "name": i}
-    requests.get(url="https://slack.com/api/conversations.create", params=params)
+for i in range(len(teamList)):
+    #params = {"token": token, "name": teamList[i]}
+    #requests.get(url="https://slack.com/api/conversations.create", params=params)
+    ws.write(0, i + 1, teamList[i])
+wb.close()
 teams = randomizeTeams(teamList, len(scoutingPairs))
 scoutsTeams = {}
 for i in range(len(scoutingPairs)):
