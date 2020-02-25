@@ -19,7 +19,7 @@ def serve_slack():
 
 def processing(slack_request):
     response_url = slack_request["response_url"]
-    message = {"response_type": "in_channel", "text": "I work"}
+    message = {"response_type": "in_channel", "text": "Hello There"}
     res = requests.post(response_url, json=message)
 
 if __name__ == "__main__":

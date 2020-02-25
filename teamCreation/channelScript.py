@@ -31,15 +31,19 @@ def randomizeTeams(teamList, scoutpairs=6):
         teamRandom[-1].append(randomChoice)
     return teamRandom
 
-wb = xlsxwriter.Workbook("teamInfo.xlsx")
-ws = wb.add_worksheet()
-LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#wb = xlsxwriter.Workbook("teamInfo.xlsx")
+#ws = wb.add_worksheet()
 teamList = getTeams()
 for i in range(len(teamList)):
+    #These lines work, I would not recommend running them until they are needed
     #params = {"token": token, "name": teamList[i]}
     #requests.get(url="https://slack.com/api/conversations.create", params=params)
-    ws.write(0, i + 1, teamList[i])
-wb.close()
+    #ws.write(0, i + 1, teamList[i])
+    pass
+#wb.close()
+params = {"token": token, "channels": "general", "file": "docs\queuing-lady.png"}
+r = requests.post("https://slack.com/api/files.upload")
+print(r.text)
 teams = randomizeTeams(teamList, len(scoutingPairs))
 scoutsTeams = {}
 for i in range(len(scoutingPairs)):
