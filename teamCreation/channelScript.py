@@ -48,7 +48,7 @@ for i in range(len(teamList)):
     for k, v in scoutsTeams.items():
         if teamList[i] in v:
             botScouters = k
-    chatParams = {"token": token, "channel": teamList[i], "text": f"""Hi there, this is the channel for team #{teamList[i]}. If you are a scouter, please remember, qualitative data is a lot more useful to us than quantitative stuff, For example, this teams driver kept crashing into the wall is far more useful than this team climbed in 12 seconds. A good scouting report would look something like this:
+    chatParams = {"token": token, "channel": teamList[i], "text": f"""Hi there, this is the channel for team #{teamList[i]}. If you are a scouter, please remember, qualitative data is a lot more useful to us than quantitative stuff, For example, this teams driver kept crashing into the wall is far more useful than this team climbed in 12 seconds. A scouting report might look something like this:
 Qualifier #
 Teams on alliance
 Observations during autonomous (did it drive across the line, did it not move at all, did it score balls in high / low goal)
