@@ -56,8 +56,8 @@ for i in range(len(teamList)):
         if teamList[i] in v:
             botScouters = k
         for person in botScouters.split(", "):
-            inviteParams = {"token": token, "channel": teamList[i], "user": userIDs[person]}
-            requests.get("https://slack.com/api/channels.invite", params=inviteParams)
+            inviteParams = {"token": token, "channel": teamList[i], "users": userIDs[person]}
+            requests.get("https://slack.com/api/conversations.invite", params=inviteParams)
     chatParams = {"token": token, "channel": teamList[i], "text": f"""Hi there, this is the channel for team #{teamList[i]}. If you are a scouter, please remember, qualitative data is a lot more useful to us than quantitative stuff. For example, this teams driver kept crashing into the wall is far more useful than this team climbed in 12 seconds. A scouting report might look something like this:
 Qualifier #
 Teams on alliance
