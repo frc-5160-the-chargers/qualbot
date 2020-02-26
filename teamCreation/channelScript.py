@@ -48,7 +48,13 @@ for i in range(len(teamList)):
     for k, v in scoutsTeams.items():
         if teamList[i] in v:
             botScouters = k
-    chatParams = {"token": token, "channel": teamList[i], "text": f"""Hi there, this is the channel for team #{teamList[i]}. If you are a scouter, please remember, qualitative data is a lot more useful to us than quantitative stuff, For example, this teams driver kept crashing into the wall is far more useful than this team climbed in 12 seconds. This team is scouted by {botScouters}"""}
+    chatParams = {"token": token, "channel": teamList[i], "text": f"""Hi there, this is the channel for team #{teamList[i]}. If you are a scouter, please remember, qualitative data is a lot more useful to us than quantitative stuff, For example, this teams driver kept crashing into the wall is far more useful than this team climbed in 12 seconds. A good scouting report would look something like this:
+Qualifier #
+Teams on alliance
+Observations during autonomous (did it drive across the line, did it not move at all, did it score balls in high / low goal)
+Observations during teleop (human controlled) (did the driver go fast, did robot break, good shooter / ball dumper, fast / slow cycles)
+Observations during endgame (did they climb, how fast did they climb, reliability of climber)
+This team is scouted by {botScouters}"""}
     requests.get(url="https://slack.com/api/chat.postMessage", params=chatParams)
 
 # chatParams = {"token": token, "channel": "scouting", "text": f"123"}
