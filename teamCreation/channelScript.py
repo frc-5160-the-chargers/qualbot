@@ -1,4 +1,4 @@
-import json, requests, random, math, xlsxwriter
+import json, requests, random, math
 
 with open(r"teamCreation\secrets.json") as json_file:
     fileContents = json.load(json_file)
@@ -6,7 +6,7 @@ authKey = fileContents["authKey"]
 
 with open(r"teamCreation\slack_tokens.json") as tokenFile:
     fileContents = json.load(tokenFile)
-token = fileContents["bot_token"]
+token = fileContents["actual_token"]
 
 with open(r"teamCreation\scouters.txt", "r") as scouterList:
     scoutingPairs = scouterList.read().split("\n")
@@ -31,22 +31,26 @@ def randomizeTeams(teamList, scoutpairs=6):
         teamRandom[-1].append(randomChoice)
     return teamRandom
 
-#wb = xlsxwriter.Workbook("teamInfo.xlsx")
-#ws = wb.add_worksheet()
 teamList = getTeams()
 for i in range(len(teamList)):
     #These lines work, I would not recommend running them until they are needed
-    #params = {"token": token, "name": teamList[i]}
-    #requests.get(url="https://slack.com/api/conversations.create", params=params)
-    #ws.write(0, i + 1, teamList[i])
-    pass
-#wb.close()
-params = {"token": token, "channels": "general", "file": "docs\queuing-lady.png"}
-r = requests.post("https://slack.com/api/files.upload")
-print(r.text)
+    channelParams = {"token": token, "name": teamList[i]}
+    requests.get(url="https://slack.com/api/conversations.create", params=channelParams)
+
 teams = randomizeTeams(teamList, len(scoutingPairs))
 scoutsTeams = {}
 for i in range(len(scoutingPairs)):
     scoutsTeams.setdefault(scoutingPairs[i], teams[i])
 with open(r"teamCreation\teamsRandomized.txt", "w") as writeFile:
     writeFile.write(str(scoutsTeams))
+
+for i in range(len(teamList)):
+    for k, v in scoutsTeams.items():
+        if teamList[i] in v:
+            botScouters = k
+    chatParams = {"token": token, "channel": teamList[i], "text": f"""Hi there, this is the channel for team #{teamList[i]}. If you are a scouter, please remember, qualitative data is a lot more useful to us than quantitative stuff, For example, this teams driver kept crashing into the wall is far more useful than this team climbed in 12 seconds. This team is scouted by {botScouters}"""}
+    requests.get(url="https://slack.com/api/chat.postMessage", params=chatParams)
+
+# chatParams = {"token": token, "channel": "scouting", "text": f"123"}
+# r = requests.get(url="https://slack.com/api/chat.postMessage", params=chatParams)
+# print(r.text)
