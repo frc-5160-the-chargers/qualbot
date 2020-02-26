@@ -1,4 +1,8 @@
-import json, requests, random, math
+import json, requests, random, math, sys
+
+yn = input("Are you sure you want to run this (y/n)\n> ")
+if yn == "n":
+    sys.exit("You quit")
 
 with open(r"teamCreation\secrets.json") as json_file:
     fileContents = json.load(json_file)
