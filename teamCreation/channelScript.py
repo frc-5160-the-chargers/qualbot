@@ -40,6 +40,9 @@ def randomizeTeams(teamList, scoutpairs=6):
 
 teamList = getTeams()
 for i in range(len(teamList)):
+    teamList[i] += "_wake_2020"
+
+for i in range(len(teamList)):
     #These lines work, I would not recommend running them until they are needed
     channelParams = {"token": token, "name": teamList[i]}
     requests.get(url="https://slack.com/api/conversations.create", params=channelParams)
