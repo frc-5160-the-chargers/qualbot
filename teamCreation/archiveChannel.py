@@ -39,7 +39,13 @@ def randomizeTeams(teamList, scoutpairs=6):
     return teamRandom
 
 teamList = getTeams()
-for i in range(len(teamList)):
-    #These lines work, I would not recommend running them until they are needed
-    channelParams = {"token": token, "name": teamList[i]}
-    requests.get("https://slack.com/api/conversations.archive", params=channelParams)
+# for i in range(len(teamList)):
+#     #These lines work, I would not recommend running them until they are needed
+#     channelParams = {"token": token, "name": teamList[i]}
+#     requests.get("https://slack.com/api/conversations.archive", params=channelParams)
+
+channelParams = {"token": token, "channel": "CUA5VGTDF"}
+r = requests.get("https://slack.com/api/conversations.join", params= {"token": token, "channel": "CUA5VGTDF"})
+print(r.text)
+r = requests.get("https://slack.com/api/conversations.archive", params=channelParams)
+print(r.text)
