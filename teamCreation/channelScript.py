@@ -64,6 +64,7 @@ Teams on alliance
 Observations during autonomous (did it drive across the line, did it not move at all, did it score balls in high / low goal)
 Observations during teleop (human controlled) (did the driver go fast, did robot break, good shooter / ball dumper, fast / slow cycles)
 Observations during endgame (did they climb, how fast did they climb, reliability of climber)
+In general, just get a good vibe with the teams you are scouting, and not feel obligated to takes notes on every single match, if there are 4 robots to scout in a single match, you can probably skip a few if you feel you cant make worthwhile notes.
 This team is scouted by {botScouters}"""}
     requests.get(url="https://slack.com/api/chat.postMessage", params=chatParams)
 
