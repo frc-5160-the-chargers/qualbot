@@ -12,12 +12,6 @@ with open(r"teamCreation\slack_tokens.json") as tokenFile:
     fileContents = json.load(tokenFile)
 token = fileContents["actual_token"]
 
-with open(r"teamCreation\slackIDs.json") as idFile:
-    userIDs = json.load(idFile)
-
-with open(r"teamCreation\scouters.txt", "r") as scouterList:
-    scoutingPairs = scouterList.read().split("\n")
-
 def getTeams(event="2020ncwak"):
     teams = requests.get(url=f"https://www.thebluealliance.com/api/v3/event/{event}/teams", headers={"X-TBA-Auth-Key": authKey}).json()
     teamList = []
@@ -26,26 +20,15 @@ def getTeams(event="2020ncwak"):
     teamList.remove("5160")
     return teamList
 
-def randomizeTeams(teamList, scoutpairs=6):
-    random.shuffle(teamList)
-    teamRandom = []
-    teamsPerPair = math.ceil(len(teamList) / scoutpairs)
-    for i in range(0, len(teamList), teamsPerPair):
-        teamRandom.append(teamList[i:i + teamsPerPair])
-    if len(teamRandom[-1]) != teamsPerPair:
-        randomChoice = random.choice(teamRandom[-2])
-        teamRandom[-2].remove(randomChoice)
-        teamRandom[-1].append(randomChoice)
-    return teamRandom
-
 teamList = getTeams()
-# for i in range(len(teamList)):
-#     #These lines work, I would not recommend running them until they are needed
-#     channelParams = {"token": token, "name": teamList[i]}
-#     requests.get("https://slack.com/api/conversations.archive", params=channelParams)
 
-channelParams = {"token": token, "channel": "CUA5VGTDF"}
-r = requests.get("https://slack.com/api/conversations.join", params= {"token": token, "channel": "CUA5VGTDF"})
-print(r.text)
-r = requests.get("https://slack.com/api/conversations.archive", params=channelParams)
-print(r.text)
+for i in range(len(teamList)):
+    teamList[i] += "_wake_2020"
+
+for i in range(len(teamList)):
+    # These lines work, I would not recommend running them until they are needed
+    channelList = requests.get("https://slack.com/api/conversations.list", params={"token": token, "exclude_archived": "true"}).json()
+    print(channelList["channels"][i]["name"])
+    if "wake_2020" in channelList["channels"][i]["name"]:
+        channelParams = {"token": token, "channel": channelList["channels"][i]["id"]}
+        requests.get("https://slack.com/api/conversations.archive", params=channelParams)
