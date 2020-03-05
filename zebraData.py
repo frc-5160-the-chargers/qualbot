@@ -5,8 +5,8 @@ import numpy as np
 with open("zebraData.json") as readFile:
     zebraData = json.load(readFile)
 
-xRaw = zebraData["alliances"]["blue"][2]["xs"]
-yRaw = zebraData["alliances"]["blue"][2]["ys"]
+xRaw = zebraData["alliances"]["red"][1]["xs"]
+yRaw = zebraData["alliances"]["red"][1]["ys"]
 timesRaw = zebraData["times"]
 
 x, y, times = [], [], []
@@ -30,6 +30,6 @@ plt.ylim(bottom=0, top=26 + 7/12)
 
 plt.ylabel("Height of Field")
 plt.xlabel("Width of Field")
-plt.title("Location of Robot " + zebraData["alliances"]["blue"][2]["team_key"] + " in match " + zebraData["key"])
+plt.title("Location of Robot " + zebraData["alliances"]["red"][1]["team_key"] + " in match " + zebraData["key"])
 
 plt.show()
