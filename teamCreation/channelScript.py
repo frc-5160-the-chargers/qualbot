@@ -51,7 +51,7 @@ teams = randomizeTeams(teamList, len(scoutingPairs))
 scoutsTeams = {}
 for i in range(len(scoutingPairs)):
     scoutsTeams.setdefault(scoutingPairs[i], teams[i])
-with open(r"teamCreation\teamsRandomized.txt", "w") as writeFile:
+with open(r"teamCreation\teamsRandomized.json", "w") as writeFile:
     writeFile.write(str(scoutsTeams))
 
 for i in range(len(teamList)):
@@ -65,17 +65,9 @@ Observations during autonomous (did it drive across the line, did it not move at
 Observations during teleop (human controlled) (did the driver go fast, did robot break, good shooter / ball dumper, fast / slow cycles)
 Observations during endgame (did they climb, how fast did they climb, reliability of climber)
 In general, just get a good vibe with the teams you are scouting, and not feel obligated to takes notes on every single match, if there are 4 robots to scout in a single match, you can probably skip a few if you feel you cant make worthwhile notes.
+On the TBA (The Blue Alliance) app, you can star teams that you are scouting and it will notify you when they are about to play.
 This team is scouted by {botScouters}"""}
     requests.get(url="https://slack.com/api/chat.postMessage", params=chatParams)
 
-for i in range(len(teamList)):
-    for k, v in scoutsTeams.items():
-        if teamList[i] in v:
-            botScouters = k
-        for person in botScouters.split(", "):
-            inviteParams = {"token": token, "channel": teamList[i], "users": userIDs[person]}
-            requests.get("https://slack.com/api/conversations.invite", params=inviteParams)
-
-# chatParams = {"token": token, "channel": "scouting", "text": f"123"}
-# r = requests.get(url="https://slack.com/api/chat.postMessage", params=chatParams)
-# print(r.text)
+chatParams = {"token": token, "channel": "scouting", "text": f"Scout teams: {scoutsTeams}"}
+requests.get(url="https://slack.com/api/chat.postMessage", params=chatParams)

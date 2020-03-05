@@ -6,6 +6,7 @@ run_queuing_lady.sh
 slack_tokens.json
 secrets.json
 scouters.txt
-teamsRandomized.txt
+teamsRandomized.json
 teamInfo.xlsx
 slackIDs.json
+inviteToAll.json
