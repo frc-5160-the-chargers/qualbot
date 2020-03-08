@@ -40,7 +40,8 @@ def randomizeTeams(teamList, scoutpairs=6):
 
 teamList = getTeams()
 for i in range(len(teamList)):
-    teamList[i] += "_wake_2020"
+    teamInfo = requests.get(f"https://www.thebluealliance.com/api/v3/team/frc{teamList[i]}/simple")
+    teamList[i] += "_" + teamInfo["nickname"] + "_wake_2020"
 
 for i in range(len(teamList)):
     #These lines work, I would not recommend running them until they are needed
@@ -66,6 +67,7 @@ Observations during teleop (human controlled) (did the driver go fast, did robot
 Observations during endgame (did they climb, how fast did they climb, reliability of climber)
 In general, just get a good vibe with the teams you are scouting, and not feel obligated to takes notes on every single match, if there are 4 robots to scout in a single match, you can probably skip a few if you feel you cant make worthwhile notes.
 On the TBA (The Blue Alliance) app, you can star teams that you are scouting and it will notify you when they are about to play.
+Please have your slack notifications turned on and be ready to respond in case you are needed.
 This team is scouted by {botScouters}"""}
     requests.get(url="https://slack.com/api/chat.postMessage", params=chatParams)
 
