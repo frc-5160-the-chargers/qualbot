@@ -71,5 +71,9 @@ Please have your slack notifications turned on and be ready to respond in case y
 This team is scouted by {botScouters}"""}
     requests.get(url="https://slack.com/api/chat.postMessage", params=chatParams)
 
-chatParams = {"token": token, "channel": "scouting", "text": f"Scout teams: {scoutsTeams}"}
+scoutingTeams = ""
+for k, v in scoutsTeams.items():
+    scoutingTeams += k + ": " + v
+
+chatParams = {"token": token, "channel": "scouting", "text": f"Scout teams: {scoutingTeams}"}
 requests.get(url="https://slack.com/api/chat.postMessage", params=chatParams)
