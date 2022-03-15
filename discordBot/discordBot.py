@@ -1,10 +1,12 @@
-import json, discord, requests, random, math
+import json, discord, requests, random, math, openpyxl
 from discord.ext import commands
+from openpyxl import Workbook
 
 with open(r"discordBot\auth.json") as auth_file:
     authFile = json.load(auth_file)
     TOKEN = authFile["token"]
     authKey = authFile["API"]
+    guildID = authFile["ID"]
 
 with open(r"discordBot\scouters.txt", "r") as scouterList:
     scoutingPairs = scouterList.read().split("\n")
@@ -72,5 +74,24 @@ def randomizeTeams(teamList, scoutpairs=6):
         teamRandom[-2].remove(randomChoice)
         teamRandom[-1].append(randomChoice)
     return teamRandom
+
+@bot.command(name='checkScouting', description="Reads through channels under a specific event ")
+async def checkScouting(ctx, event):
+    info = ["Climbing", 'Shooter Type', 'Automonus', "Role", "Climbing Time", "Other Notes"]
+    eventName = input("Enter event name: ")
+    server = bot.get_guild(guildID)
+    wb = Workbook()
+    for channel in server:
+        if channel.name == eventName:
+            rowNum = 2
+            colNum = 2
+            sheet = wb.create_sheet(title=channel.name)
+            for textChannel in range(len(channel.channels)):
+                sheet.cell(column=1, row=rowNum, value=textChannel)   
+                rowNum+=1
+            rowNum = 2
+            for role in info:
+                sheet.cell(column=colNum, row=1, value=role)
+                colNum+=1
 
 bot.run(TOKEN)
