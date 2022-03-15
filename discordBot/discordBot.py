@@ -76,7 +76,7 @@ def randomizeTeams(teamList, scoutpairs=6):
     return teamRandom
 
 @bot.command(name='checkScouting', description="Reads through channels under a specific event ")
-async def checkScouting(ctx, event):
+async def checkScouting(ctx):
     info = ["Climbing", 'Shooter Type', 'Automonus', "Role", "Climbing Time", "Other Notes"]
     eventName = input("Enter event name: ")
     server = bot.get_guild(guildID)
