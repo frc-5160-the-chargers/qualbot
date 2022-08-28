@@ -4,3 +4,13 @@ __pycache__
 run_queuing_lady.sh
 .vscode
 slack_tokens.json
+secrets.json
+scouters.txt
+teamsRandomized.txt
+teamsRandomized.json
+teams.py
+teamInfo.xlsx
+slackIDs.json
+inviteToAll.json
+zebraData.json
+auth.json
