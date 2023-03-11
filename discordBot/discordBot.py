@@ -9,9 +9,11 @@ with open(r"discordBot\auth.json") as auth_file:
 with open(r"discordBot\scouters.txt", "r") as scouterList:
     scoutingPairs = scouterList.read().split("\n")
 
-bot = commands.Bot(command_prefix='!', description="Bot commands")
+intents = discord.Intents.default() 
+intents.message_content = True
+bot = commands.Bot(command_prefix = '!', description="Bot commands", intents=intents)
 
-@bot.command(name="createChannels", description="Create channels")
+@bot.command()
 async def createChannels(ctx, event):
     teamList = getTeams(event)
     for i in range(len(teamList)):
@@ -29,9 +31,9 @@ async def createChannels(ctx, event):
     for i in range(len(scoutingPairs)):
         scoutsTeams.setdefault(scoutingPairs[i], teams[i])
     with open(r"discordBot\teamsRandomized.json", "w") as writeFile:
-        writeFile.write(str(scoutsTeams))
+        json.dump(str(scoutsTeams), writeFile)
 
-@bot.command(name="deleteChannels", description="Create channels")
+@bot.command()
 async def deleteChannels(ctx, event):
     # teamList = getTeams(event)
     # for i in range(len(teamList)):
@@ -61,7 +63,7 @@ def getTeams(event):
     teamList.remove("5160")
     return teamList
 
-def randomizeTeams(teamList, scoutpairs=6):
+def randomizeTeams(teamList, scoutpairs=5):
     random.shuffle(teamList)
     teamRandom = []
     teamsPerPair = math.ceil(len(teamList) / scoutpairs)
