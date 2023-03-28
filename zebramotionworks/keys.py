@@ -4,9 +4,19 @@ import json
 with open(r"discordBot\auth.json") as auth_file:
     authFile = json.load(auth_file)
     authKey = authFile["API"]
+year = '2023'
 
-with open("keys.txt", 'r') as file:
-    event_keys = json.load(file)
+url = f'https://www.thebluealliance.com/api/v3/events/{year}'
+
+headers = {'X-TBA-Auth-Key': authKey}
+
+response = requests.get(url, headers=headers)
+
+if response.status_code == 200:
+    events = json.loads(response.text)
+    event_keys = [event['key'] for event in events]
+else:
+    print(f'Request failed with status code {response.status_code}')
 
 for event_key in event_keys:
     url = f'https://www.thebluealliance.com/api/v3/event/{event_key}/matches/simple'
