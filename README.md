@@ -1,5 +1,5 @@
 # Qualbot
-Various tools used by FRC 5160 ([The Chargers](https://www.thebluealliance.com/team/5160)) to improve scouting efficiency at tournaments
+Various tools used by FRC 5160 ([The Chargers](https://www.thebluealliance.com/team/5160)) to improve scouting efficiency at tournaments.
 
 ## Webhooks
 ### Queuing Lady
@@ -24,7 +24,7 @@ Queuing Lady needs to have a few extra lines added to the config:
 All webhooks are configured through `config.json` in the root directory.
 There are some base hook configurations, for a hook derived off something else (like queuing-lady), you'll need to add a bit more to the config structure for the data taken by it.
 
-Example `config.json` structure for a discord webhook
+Example `config.json` structure for a discord webhook:
 ```json
 "discord-hook": {
     "discord-id": "",
@@ -37,7 +37,7 @@ Example `config.json` structure for a discord webhook
 }
 ```
 
-Example `config.json` structure for a slack webhook
+Example `config.json` structure for a slack webhook:
 ```json
 "slack-hook": {
     "slack-url": "",
@@ -49,7 +49,7 @@ Example `config.json` structure for a slack webhook
 }
 ```
 
-This is also required for the logging and everything to work -- just change `logging` to wherever you want the log file to be. 
+This is also required for the logging and everything to work -- just change `logging` to wherever you want the log file to be:
 ```json
 "logging": {
     "log-file": "log.txt"
